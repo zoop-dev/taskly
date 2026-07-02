@@ -1,0 +1,360 @@
+@import "zoop-kit/tokens.css";
+@import "zoop-kit/components.css";
+
+:root {
+  --accent: #b28dff;
+  --accent-on: #1a1023;
+  --grad: #150a2e 0%, #2c1359 55%, #6a2fd0 100%;
+}
+
+/* todo list */
+.todo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.todo-row.dragging {
+  position: relative;
+  z-index: 5;
+  background: var(--glass-strong);
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  transform: scale(1.02);
+}
+
+.todo-check {
+  all: unset;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: transparent;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.todo-row.done .todo-check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-on);
+  animation: todo-check-bounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.check-svg {
+  width: 16px;
+  height: 16px;
+  overflow: visible;
+}
+
+.check-path {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  transition: stroke-dashoffset 0.25s ease 0.05s;
+}
+
+.todo-row.done .check-path {
+  stroke-dashoffset: 0;
+}
+
+@keyframes todo-check-bounce {
+  0% {
+    transform: scale(0.85);
+  }
+  55% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.todo-text {
+  flex: 1;
+  font-size: 0.95rem;
+  min-width: 0;
+  word-break: break-word;
+  cursor: pointer;
+}
+
+.todo-text-inner {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.todo-text-inner::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease 0.05s;
+}
+
+.todo-row.done .todo-text {
+  color: var(--muted);
+  transition: color 0.3s ease;
+}
+
+.todo-row.done .todo-text-inner::after {
+  transform: scaleX(1);
+}
+
+.todo-add-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.todo-add-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+/* boards list */
+.board-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.board-row.dragging {
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  transform: scale(1.02);
+}
+
+.board-pin md-icon {
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+
+.board-pin.pinned md-icon {
+  color: #ff6a6a;
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+.board-color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.board-row-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.board-row-name {
+  font-weight: 600;
+}
+
+.board-row-count {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* kanban board */
+.kanban-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: max(18px, env(safe-area-inset-top)) 18px 8px;
+}
+
+.kanban-title {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kanban-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 18px 18px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.kanban-column {
+  flex: 0 0 auto;
+  max-height: 45vh;
+  min-height: 0;
+  width: 100%;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kanban-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.kanban-column-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kanban-column-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.kanban-column-count {
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: var(--glass-strong);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.kanban-cards {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.kanban-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 0.88rem;
+  user-select: none;
+}
+
+.kanban-card-text {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.drag-handle {
+  flex-shrink: 0;
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+  font-size: 20px;
+  --md-icon-size: 20px;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.kanban-card.dragging {
+  opacity: 0.4;
+}
+
+.kanban-card.card-enter {
+  animation: kanban-card-enter 0.25s ease;
+}
+
+@keyframes kanban-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.kanban-card-ghost {
+  position: fixed;
+  z-index: 500;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass-strong);
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 0.88rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  transform: rotate(-2deg);
+}
+
+.kanban-column.drop-target {
+  border-color: var(--accent);
+}
+
+.kanban-add-card-btn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  padding: 8px 4px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.kanban-add-card-btn md-icon {
+  font-size: 18px;
+  --md-icon-size: 18px;
+}
+
+#board-overlay {
+  padding: 0;
+}
+
+#app {
+  padding-bottom: max(18px, env(safe-area-inset-bottom));
+}
+
+.settings-fab {
+  bottom: max(18px, calc(env(safe-area-inset-bottom) + 6px));
+}
