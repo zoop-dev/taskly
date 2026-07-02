@@ -151,6 +151,16 @@ function renderApp() {
             <md-icon slot="start">apps</md-icon>
             <div slot="headline">Other apps by me</div>
           </md-list-item>
+          <md-list-item type="button" id="settings-github">
+            <md-icon slot="start">code</md-icon>
+            <div slot="headline">View source</div>
+            <div slot="supporting-text">github.com/zoop-dev/taskly</div>
+          </md-list-item>
+          <md-list-item type="button" id="settings-clear-data">
+            <md-icon slot="start">delete_sweep</md-icon>
+            <div slot="headline">Clear all data</div>
+            <div slot="supporting-text">removes every project, todo, and card</div>
+          </md-list-item>
         </md-list>
       </div>
       <div slot="actions">
@@ -216,6 +226,22 @@ function initSettings() {
   document.querySelector('#settings-other-apps').addEventListener('click', () => {
     settingsDialog.close()
     showAppSwitcher('taskly')
+  })
+
+  document.querySelector('#settings-github').addEventListener('click', () => {
+    window.open('https://github.com/zoop-dev/taskly', '_blank', 'noopener')
+  })
+
+  document.querySelector('#settings-clear-data').addEventListener('click', async () => {
+    settingsDialog.close()
+    const ok = await zkConfirm("This removes every project, todo, and card. Can't be undone.", {
+      title: 'Clear all data?',
+      confirmLabel: 'Clear',
+      destructive: true,
+    })
+    if (!ok) return
+    localStorage.clear()
+    window.location.reload()
   })
 }
 
