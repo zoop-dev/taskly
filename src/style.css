@@ -7,7 +7,7 @@
   --grad: #150a2e 0%, #2c1359 55%, #6a2fd0 100%;
 }
 
-/* todo list */
+
 .todo-row {
   display: flex;
   align-items: center;
@@ -132,7 +132,7 @@
   font-size: 1rem;
 }
 
-/* boards list */
+
 .board-row {
   display: flex;
   align-items: center;
@@ -179,7 +179,7 @@
   color: var(--muted);
 }
 
-/* kanban board */
+
 .kanban-header {
   display: flex;
   align-items: center;

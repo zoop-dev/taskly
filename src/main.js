@@ -1,4 +1,4 @@
-// Copyright (c) 2026 zoop. See LICENSE.
+
 
 import './style.css'
 import '@material/web/icon/icon.js'
@@ -79,7 +79,7 @@ function positionSegmentedThumb(container) {
   thumb.style.transform = `translateX(${active.offsetLeft - 3}px)`
 }
 
-// ---------- storage ----------
+
 function loadBoards() {
   try {
     return JSON.parse(localStorage.getItem(BOARDS_KEY)) || []
@@ -95,7 +95,7 @@ function emptyColumns() {
   return { todo: [], progress: [], done: [] }
 }
 
-// ---------- home: projects list ----------
+
 function renderApp() {
   const app = document.querySelector('#app')
   app.innerHTML = `
@@ -177,7 +177,7 @@ function initSettings() {
     try {
       found = await checkForUpdate()
     } catch {
-      // treat a failed check the same as "nothing new"
+      
     }
     setTimeout(() => item.classList.remove('spinning'), 600)
     settingsDialog.close()
@@ -204,7 +204,7 @@ function initSettings() {
       try {
         await navigator.share({ title: 'Taskly', text: 'a todo list and kanban board, no permissions needed', url })
       } catch {
-        // user cancelled the share sheet
+        
       }
     } else {
       await navigator.clipboard.writeText(url)
@@ -231,7 +231,7 @@ function initBoardsScreen() {
       list.innerHTML = `<div class="empty-hint">no projects yet</div>`
       return
     }
-    // pinned first, each group keeping its stored relative order
+    
     const sorted = boards
       .map((b, i) => ({ b, i }))
       .sort((x, y) => (y.b.pinned ? 1 : 0) - (x.b.pinned ? 1 : 0) || x.i - y.i)
@@ -316,7 +316,7 @@ function initBoardsScreen() {
   window.__tasklyRenderBoards = render
 }
 
-// ---------- project view (todo + kanban) ----------
+
 let projectView = 'todo'
 
 function openBoard(boardId) {
@@ -632,7 +632,7 @@ function renderProjectBoard(boardId, rerender) {
   const boards = loadBoards()
   const board = boards.find((b) => b.id === boardId)
 
-  // capture pre-render heights so the resize can animate rather than snap
+  
   const oldHeights = new Map()
   body.querySelectorAll('.kanban-column').forEach((col) => {
     oldHeights.set(col.dataset.col, col.getBoundingClientRect().height)
@@ -678,8 +678,8 @@ function renderProjectBoard(boardId, rerender) {
       col.style.flex = 'none'
       col.style.height = `${oldH}px`
       col.style.transition = 'none'
-      // force reflow before switching to the target height so the browser
-      // actually animates from oldH instead of jumping straight to newH
+      
+      
       col.offsetHeight
       col.style.transition = 'height 0.25s ease'
       col.style.height = `${newH}px`
@@ -731,7 +731,7 @@ function renderProjectBoard(boardId, rerender) {
   wireDrag(body, boardId, rerender)
 }
 
-// ---------- drag and drop (pointer events — unifies mouse + touch + pen) ----------
+
 function wireDrag(root, boardId, rerender) {
   root.querySelectorAll('.kanban-card').forEach((card) => {
     const handle = card.querySelector('.drag-handle')
@@ -762,7 +762,7 @@ function flipReorder(containers, mutate, itemSelector = '.kanban-card') {
 }
 
 function onCardPointerDown(startEvent, card, root, boardId, rerender) {
-  if (startEvent.button != null && startEvent.button !== 0) return // only primary mouse button
+  if (startEvent.button != null && startEvent.button !== 0) return 
 
   const startX = startEvent.clientX
   const startY = startEvent.clientY
@@ -795,8 +795,8 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
     ghost.style.left = `${ev.clientX - offsetX}px`
     ghost.style.top = `${ev.clientY - offsetY}px`
 
-    // columns are stacked vertically, so the drop target is whichever
-    // column's row-band the pointer's Y position currently falls within
+    
+    
     let targetCardsEl = null
     root.querySelectorAll('.kanban-column').forEach((col) => {
       const rect = col.getBoundingClientRect()
@@ -806,9 +806,9 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
     })
     if (!targetCardsEl) return
 
-    // find which existing card (other than the one being dragged) the
-    // pointer is above, so the rest can slide out of the way to preview
-    // exactly where it'll land
+    
+    
+    
     const siblings = [...targetCardsEl.querySelectorAll('.kanban-card')].filter((c) => c !== card)
     let insertBefore = null
     for (const sib of siblings) {
@@ -842,8 +842,8 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
     ghost?.remove()
     if (!lifted) return
 
-    // the card's live DOM position (already reordered during the drag via
-    // flipReorder) tells us exactly where it should land — column and index
+    
+    
     const cardsContainer = card.closest('.kanban-cards')
     if (!cardsContainer) return
     const toCol = cardsContainer.dataset.col
