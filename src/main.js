@@ -20,6 +20,7 @@ import { maybeShowChangelog, showFullChangelog } from 'zoop-kit/changelog.js'
 import { initDesktopWarning } from 'zoop-kit/desktop-warning.js'
 import { initSavedTheme, showThemePicker } from 'zoop-kit/theme-picker.js'
 import { showAppSwitcher } from 'zoop-kit/app-switcher.js'
+import confetti from 'canvas-confetti'
 import { APP_VERSION, CHANGELOG } from './changelog.js'
 
 const BOARDS_KEY = 'taskly:boards'
@@ -448,6 +449,21 @@ function openBoard(boardId) {
   }
 }
 
+
+function fireConfetti(originEl) {
+  const rect = originEl.getBoundingClientRect()
+  confetti({
+    particleCount: 60,
+    spread: 70,
+    startVelocity: 32,
+    origin: {
+      x: (rect.left + rect.width / 2) / window.innerWidth,
+      y: (rect.top + rect.height / 2) / window.innerHeight,
+    },
+    colors: ['#b28dff', '#8ec9ff', '#5ee0a0', '#ffd76a', '#ff9f5a', '#ff6ad5'],
+  })
+}
+
 function renderProjectTodo(boardId, rerender) {
   const body = document.querySelector('#project-body')
   body.innerHTML = `
@@ -494,6 +510,7 @@ function renderProjectTodo(boardId, rerender) {
         const t = b.todos.find((x) => x.id === row.dataset.id)
         if (t) t.done = !t.done
         saveBoards(bs)
+        if (t?.done && b.todos.length > 1 && b.todos.every((x) => x.done)) fireConfetti(btn)
         rerender()
       })
     })

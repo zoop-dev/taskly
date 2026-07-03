@@ -1,8 +1,17 @@
 
 
-export const APP_VERSION = '0.1.2'
+export const APP_VERSION = '0.1.3'
 
 export const CHANGELOG = [
+  {
+    version: '0.1.3',
+    date: '2026-07-03',
+    items: [
+      'fixed the drag handle hitbox being offset from the visible icon on kanban cards, todos, and projects',
+      'hid the kanban column scrollbars',
+      'clearing every todo in a list now gives you a little confetti burst',
+    ],
+  },
   {
     version: '0.1.2',
     date: '2026-07-02',

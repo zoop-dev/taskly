@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@material/web": "^2.4.1",
+    "canvas-confetti": "^1.9.4",
     "zoop-kit": "file:../zoop-kit"
   }
 }
