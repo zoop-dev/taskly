@@ -540,11 +540,6 @@ function wireTodoDrag(list, boardId, rerender) {
 function onTodoPointerDown(startEvent, row, list, boardId, rerender) {
   if (startEvent.button != null && startEvent.button !== 0) return
 
-  
-  
-  
-  row.setPointerCapture(startEvent.pointerId)
-
   const startY = startEvent.clientY
   let lifted = false
 
@@ -553,6 +548,7 @@ function onTodoPointerDown(startEvent, row, list, boardId, rerender) {
     if (!lifted) {
       if (Math.abs(dy) < 10) return
       lifted = true
+      row.setPointerCapture(startEvent.pointerId)
       row.classList.add('dragging')
     }
 
@@ -611,8 +607,6 @@ function wireBoardDrag(list) {
 function onBoardPointerDown(startEvent, row, list) {
   if (startEvent.button != null && startEvent.button !== 0) return
 
-  row.setPointerCapture(startEvent.pointerId)
-
   const startY = startEvent.clientY
   let lifted = false
 
@@ -621,6 +615,7 @@ function onBoardPointerDown(startEvent, row, list) {
     if (!lifted) {
       if (Math.abs(dy) < 10) return
       lifted = true
+      row.setPointerCapture(startEvent.pointerId)
       row.classList.add('dragging')
     }
 
@@ -805,8 +800,6 @@ function flipReorder(containers, mutate, itemSelector = '.kanban-card') {
 function onCardPointerDown(startEvent, card, root, boardId, rerender) {
   if (startEvent.button != null && startEvent.button !== 0) return 
 
-  card.setPointerCapture(startEvent.pointerId)
-
   const startX = startEvent.clientX
   const startY = startEvent.clientY
   const originalCol = card.dataset.col
@@ -823,6 +816,7 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
     if (!lifted) {
       if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return
       lifted = true
+      card.setPointerCapture(startEvent.pointerId)
       card.classList.add('dragging')
       card.style.touchAction = 'none'
       ghost = document.createElement('div')
