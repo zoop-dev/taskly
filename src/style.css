@@ -302,10 +302,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  
-  padding: 40px;
-  margin: -40px;
-  
+  width: 48px;
+  height: 48px;
   position: relative;
   z-index: 2;
 }
