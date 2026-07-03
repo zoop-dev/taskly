@@ -26,6 +26,11 @@ const BOARDS_KEY = 'taskly:boards'
 const VERSION_KEY = 'taskly:version'
 const THEME_KEY = 'taskly:theme'
 
+
+
+
+const DRAG_HANDLE_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="9" cy="7" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="17" r="2"/><circle cx="15" cy="17" r="2"/></svg>`
+
 const THEMES = {
   purple: { accent: '#b28dff', accentOn: '#1a1023', grad: '#150a2e 0%, #2c1359 55%, #6a2fd0 100%' },
   blue: { accent: '#4cc9ff', accentOn: '#04121c', grad: '#0a1330 0%, #123a63 55%, #1c6fd0 100%' },
@@ -279,7 +284,7 @@ function initBoardsScreen() {
         const todoCount = b.todos.filter((t) => !t.done).length
         return `
           <div class="card board-row" data-id="${b.id}">
-            <md-icon class="drag-handle">drag_indicator</md-icon>
+            <span class="drag-handle">${DRAG_HANDLE_SVG}</span>
             <div class="board-color-dot" style="background:${b.color}"></div>
             <div class="board-row-info">
               <div class="board-row-name">${b.name}</div>
@@ -466,7 +471,7 @@ function renderProjectTodo(boardId, rerender) {
       .map(
         (t) => `
           <div class="todo-row${t.done ? ' done' : ''}" data-id="${t.id}">
-            <md-icon class="drag-handle">drag_indicator</md-icon>
+            <span class="drag-handle">${DRAG_HANDLE_SVG}</span>
             <button type="button" class="todo-check">
               <svg class="check-svg" viewBox="0 0 24 24">
                 <path class="check-path" d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
@@ -689,7 +694,7 @@ function renderProjectBoard(boardId, rerender) {
               .map(
                 (card) => `
                   <div class="kanban-card" data-id="${card.id}" data-col="${col.key}">
-                    <md-icon class="drag-handle">drag_indicator</md-icon>
+                    <span class="drag-handle">${DRAG_HANDLE_SVG}</span>
                     <span class="kanban-card-text">${card.text}</span>
                   </div>
                 `
@@ -822,7 +827,7 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
       ghost = document.createElement('div')
       ghost.className = 'kanban-card-ghost'
       ghost.innerHTML = `
-        <md-icon class="drag-handle">drag_indicator</md-icon>
+        <span class="drag-handle">${DRAG_HANDLE_SVG}</span>
         <span class="kanban-card-text">${card.querySelector('.kanban-card-text').textContent}</span>
       `
       ghost.style.width = `${card.offsetWidth}px`
