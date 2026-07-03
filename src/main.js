@@ -241,7 +241,7 @@ function initSettings() {
 
   document.querySelector('#settings-other-apps').addEventListener('click', () => {
     settingsDialog.close()
-    showAppSwitcher('taskly')
+    showAppSwitcher()
   })
 
   document.querySelector('#settings-github').addEventListener('click', () => {

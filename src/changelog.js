@@ -1,8 +1,13 @@
 
 
-export const APP_VERSION = '0.1.3'
+export const APP_VERSION = '0.1.4'
 
 export const CHANGELOG = [
+  {
+    version: '0.1.4',
+    date: '2026-07-03',
+    items: ['"other apps by me" now opens the zoop apps directory page instead of an in-app list'],
+  },
   {
     version: '0.1.3',
     date: '2026-07-03',
