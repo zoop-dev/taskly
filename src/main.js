@@ -70,13 +70,23 @@ function uid() {
   return crypto.randomUUID()
 }
 
-function positionSegmentedThumb(container) {
+
+
+
+
+function positionSegmentedThumb(container, instant = true) {
   if (!container) return
   const thumb = container.querySelector('.segmented-thumb')
   const active = container.querySelector('button.active')
   if (!thumb || !active) return
+
+  if (instant) thumb.style.transition = 'none'
   thumb.style.width = `${active.offsetWidth}px`
   thumb.style.transform = `translateX(${active.offsetLeft - 3}px)`
+  if (instant) {
+    thumb.offsetWidth 
+    thumb.style.transition = ''
+  }
 }
 
 
@@ -406,7 +416,7 @@ function openBoard(boardId) {
           newThumb.style.width = oldWidth
           newThumb.offsetWidth
           newThumb.style.transition = ''
-          positionSegmentedThumb(el.querySelector('#project-view-segmented'))
+          positionSegmentedThumb(el.querySelector('#project-view-segmented'), false)
         }
       })
     })
