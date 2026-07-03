@@ -824,6 +824,7 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
       if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return
       lifted = true
       card.classList.add('dragging')
+      card.style.touchAction = 'none'
       ghost = document.createElement('div')
       ghost.className = 'kanban-card-ghost'
       ghost.innerHTML = `
@@ -881,6 +882,7 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
 
     root.querySelectorAll('.kanban-column').forEach((col) => col.classList.remove('drop-target'))
     card.classList.remove('dragging')
+    card.style.touchAction = ''
     ghost?.remove()
     if (!lifted) return
 

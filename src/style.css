@@ -208,6 +208,11 @@
   padding: 0 18px 18px;
   max-height: calc(100vh - 140px);
   overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.kanban-columns::-webkit-scrollbar {
+  display: none;
 }
 
 .kanban-column {
@@ -260,6 +265,11 @@
   flex-direction: column;
   gap: 8px;
   min-height: 40px;
+  scrollbar-width: none;
+}
+
+.kanban-cards::-webkit-scrollbar {
+  display: none;
 }
 
 .kanban-card {
