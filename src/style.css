@@ -293,8 +293,11 @@
   align-items: center;
   justify-content: center;
   
-  padding: 14px;
-  margin: -14px;
+  padding: 20px;
+  margin: -20px;
+  
+  position: relative;
+  z-index: 2;
 }
 
 .drag-handle:active {
