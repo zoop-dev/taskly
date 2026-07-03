@@ -286,15 +286,15 @@
   color: var(--muted);
   cursor: grab;
   touch-action: none;
-  font-size: 20px;
-  --md-icon-size: 20px;
+  font-size: 22px;
+  --md-icon-size: 22px;
   
   display: inline-flex;
   align-items: center;
   justify-content: center;
   
-  padding: 20px;
-  margin: -20px;
+  padding: 40px;
+  margin: -40px;
   
   position: relative;
   z-index: 2;
