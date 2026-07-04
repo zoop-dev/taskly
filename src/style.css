@@ -350,10 +350,10 @@
 }
 
 .kanban-delete-zone.visible {
-  max-height: 60px;
+  max-height: 80px;
   opacity: 1;
   margin-top: 10px;
-  padding: 14px;
+  padding: 22px 14px;
 }
 
 .kanban-delete-zone.drop-target {
