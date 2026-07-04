@@ -1,8 +1,16 @@
 
 
-export const APP_VERSION = '0.1.5'
+export const APP_VERSION = '0.1.6'
 
 export const CHANGELOG = [
+  {
+    version: '0.1.6',
+    date: '2026-07-03',
+    items: [
+      'drag a kanban card onto the new "drop here to delete" zone (under the Todo/Board tabs) to delete it',
+      'you can now skip straight past the install screen with a "continue without installing" link',
+    ],
+  },
   {
     version: '0.1.5',
     date: '2026-07-03',

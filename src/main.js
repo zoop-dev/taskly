@@ -20,17 +20,13 @@ import { maybeShowChangelog } from 'zoop-kit/changelog.js'
 import { initDesktopWarning } from 'zoop-kit/desktop-warning.js'
 import { initSavedTheme, THEMES } from 'zoop-kit/theme-picker.js'
 import { initSettingsMenu } from 'zoop-kit/settings-menu.js'
+import { wireDragList, flipReorder, DRAG_HANDLE_SVG } from 'zoop-kit/drag-list.js'
 import confetti from 'canvas-confetti'
 import { APP_VERSION, CHANGELOG } from './changelog.js'
 
 const BOARDS_KEY = 'taskly:boards'
 const VERSION_KEY = 'taskly:version'
 const THEME_KEY = 'taskly:theme'
-
-
-
-
-const DRAG_HANDLE_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="9" cy="7" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="17" r="2"/><circle cx="15" cy="17" r="2"/></svg>`
 
 let currentThemeKey = initSavedTheme(THEME_KEY, THEMES, 'violet')
 
@@ -180,7 +176,7 @@ function initBoardsScreen() {
         const todoCount = b.todos.filter((t) => !t.done).length
         return `
           <div class="card board-row" data-id="${b.id}">
-            <span class="drag-handle">${DRAG_HANDLE_SVG}</span>
+            <span class="zk-drag-handle">${DRAG_HANDLE_SVG}</span>
             <div class="board-color-dot" style="background:${b.color}"></div>
             <div class="board-row-info">
               <div class="board-row-name">${b.name}</div>
@@ -222,7 +218,16 @@ function initBoardsScreen() {
       })
     })
 
-    wireBoardDrag(list)
+    wireDragList({
+      container: list,
+      itemSelector: '.board-row',
+      onReorder: (newOrder) => {
+        const boards = loadBoards()
+        boards.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id))
+        saveBoards(boards)
+        window.__tasklyRenderBoards?.()
+      },
+    })
   }
 
   newBoardBtn.addEventListener('click', () => {
@@ -282,6 +287,9 @@ function openBoard(boardId) {
           <div class="segmented-thumb"></div>
           <button data-view="todo" class="${projectView === 'todo' ? 'active' : ''}">Todo</button>
           <button data-view="board" class="${projectView === 'board' ? 'active' : ''}">Board</button>
+        </div>
+        <div class="kanban-delete-zone" id="kanban-delete-zone">
+          <md-icon>delete</md-icon> Drop here to delete
         </div>
       </div>
       <div id="project-body"></div>
@@ -382,7 +390,7 @@ function renderProjectTodo(boardId, rerender) {
       .map(
         (t) => `
           <div class="todo-row${t.done ? ' done' : ''}" data-id="${t.id}">
-            <span class="drag-handle">${DRAG_HANDLE_SVG}</span>
+            <span class="zk-drag-handle">${DRAG_HANDLE_SVG}</span>
             <button type="button" class="todo-check">
               <svg class="check-svg" viewBox="0 0 24 24">
                 <path class="check-path" d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
@@ -395,7 +403,17 @@ function renderProjectTodo(boardId, rerender) {
       )
       .join('')
 
-    wireTodoDrag(list, boardId, rerender)
+    wireDragList({
+      container: list,
+      itemSelector: '.todo-row',
+      onReorder: (newOrder) => {
+        const boards = loadBoards()
+        const board = boards.find((b) => b.id === boardId)
+        board.todos.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id))
+        saveBoards(boards)
+        rerender()
+      },
+    })
 
     list.querySelectorAll('.todo-check').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -447,139 +465,6 @@ function renderProjectTodo(boardId, rerender) {
   })
 }
 
-function wireTodoDrag(list, boardId, rerender) {
-  list.querySelectorAll('.todo-row').forEach((row) => {
-    const handle = row.querySelector('.drag-handle')
-    handle.addEventListener('pointerdown', (e) => onTodoPointerDown(e, row, list, boardId, rerender))
-  })
-}
-
-function onTodoPointerDown(startEvent, row, list, boardId, rerender) {
-  if (startEvent.button != null && startEvent.button !== 0) return
-
-  const startY = startEvent.clientY
-  let lifted = false
-
-  function onMove(ev) {
-    const dy = ev.clientY - startY
-    if (!lifted) {
-      if (Math.abs(dy) < 10) return
-      lifted = true
-      row.setPointerCapture(startEvent.pointerId)
-      row.classList.add('dragging')
-    }
-
-    const siblings = [...list.querySelectorAll('.todo-row')].filter((r) => r !== row)
-    let insertBefore = null
-    for (const sib of siblings) {
-      const r = sib.getBoundingClientRect()
-      if (ev.clientY < r.top + r.height / 2) {
-        insertBefore = sib
-        break
-      }
-    }
-
-    const alreadyThere = insertBefore ? row.nextSibling === insertBefore : row === list.lastElementChild
-    if (alreadyThere) return
-
-    flipReorder(
-      [list],
-      () => {
-        if (insertBefore) list.insertBefore(row, insertBefore)
-        else list.appendChild(row)
-      },
-      '.todo-row'
-    )
-  }
-
-  function onEnd() {
-    row.releasePointerCapture?.(startEvent.pointerId)
-    document.removeEventListener('pointermove', onMove)
-    document.removeEventListener('pointerup', onEnd)
-    document.removeEventListener('pointercancel', onEnd)
-
-    row.classList.remove('dragging')
-    if (!lifted) return
-
-    const newOrder = [...list.querySelectorAll('.todo-row')].map((r) => r.dataset.id)
-    const boards = loadBoards()
-    const board = boards.find((b) => b.id === boardId)
-    board.todos.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id))
-    saveBoards(boards)
-    rerender()
-  }
-
-  document.addEventListener('pointermove', onMove)
-  document.addEventListener('pointerup', onEnd)
-  document.addEventListener('pointercancel', onEnd)
-}
-
-function wireBoardDrag(list) {
-  list.querySelectorAll('.board-row').forEach((row) => {
-    const handle = row.querySelector('.drag-handle')
-    handle.addEventListener('pointerdown', (e) => onBoardPointerDown(e, row, list))
-  })
-}
-
-function onBoardPointerDown(startEvent, row, list) {
-  if (startEvent.button != null && startEvent.button !== 0) return
-
-  const startY = startEvent.clientY
-  let lifted = false
-
-  function onMove(ev) {
-    const dy = ev.clientY - startY
-    if (!lifted) {
-      if (Math.abs(dy) < 10) return
-      lifted = true
-      row.setPointerCapture(startEvent.pointerId)
-      row.classList.add('dragging')
-    }
-
-    const siblings = [...list.querySelectorAll('.board-row')].filter((r) => r !== row)
-    let insertBefore = null
-    for (const sib of siblings) {
-      const r = sib.getBoundingClientRect()
-      if (ev.clientY < r.top + r.height / 2) {
-        insertBefore = sib
-        break
-      }
-    }
-
-    const alreadyThere = insertBefore ? row.nextSibling === insertBefore : row === list.lastElementChild
-    if (alreadyThere) return
-
-    flipReorder(
-      [list],
-      () => {
-        if (insertBefore) list.insertBefore(row, insertBefore)
-        else list.appendChild(row)
-      },
-      '.board-row'
-    )
-  }
-
-  function onEnd() {
-    row.releasePointerCapture?.(startEvent.pointerId)
-    document.removeEventListener('pointermove', onMove)
-    document.removeEventListener('pointerup', onEnd)
-    document.removeEventListener('pointercancel', onEnd)
-
-    row.classList.remove('dragging')
-    if (!lifted) return
-
-    const newOrder = [...list.querySelectorAll('.board-row')].map((r) => r.dataset.id)
-    const boards = loadBoards()
-    boards.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id))
-    saveBoards(boards)
-    window.__tasklyRenderBoards?.()
-  }
-
-  document.addEventListener('pointermove', onMove)
-  document.addEventListener('pointerup', onEnd)
-  document.addEventListener('pointercancel', onEnd)
-}
-
 function renderProjectBoard(boardId, rerender) {
   const body = document.querySelector('#project-body')
   const boards = loadBoards()
@@ -606,7 +491,7 @@ function renderProjectBoard(boardId, rerender) {
               .map(
                 (card) => `
                   <div class="kanban-card" data-id="${card.id}" data-col="${col.key}">
-                    <span class="drag-handle">${DRAG_HANDLE_SVG}</span>
+                    <span class="zk-drag-handle">${DRAG_HANDLE_SVG}</span>
                     <span class="kanban-card-text">${card.text}</span>
                   </div>
                 `
@@ -687,30 +572,8 @@ function renderProjectBoard(boardId, rerender) {
 
 function wireDrag(root, boardId, rerender) {
   root.querySelectorAll('.kanban-card').forEach((card) => {
-    const handle = card.querySelector('.drag-handle')
+    const handle = card.querySelector('.zk-drag-handle')
     handle.addEventListener('pointerdown', (e) => onCardPointerDown(e, card, root, boardId, rerender))
-  })
-}
-
-function flipReorder(containers, mutate, itemSelector = '.kanban-card') {
-  const items = containers.flatMap((el) => [...el.querySelectorAll(itemSelector)])
-  const before = new Map(items.map((c) => [c, c.getBoundingClientRect()]))
-
-  mutate()
-
-  const after = containers.flatMap((el) => [...el.querySelectorAll(itemSelector)])
-  after.forEach((c) => {
-    const oldRect = before.get(c)
-    if (!oldRect) return
-    const newRect = c.getBoundingClientRect()
-    const dy = oldRect.top - newRect.top
-    if (Math.abs(dy) < 1) return
-    c.style.transition = 'none'
-    c.style.transform = `translateY(${dy}px)`
-    requestAnimationFrame(() => {
-      c.style.transition = 'transform 0.18s ease'
-      c.style.transform = ''
-    })
   })
 }
 
@@ -725,6 +588,8 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
   const offsetY = startY - cardRect.top
   let lifted = false
   let ghost = null
+  let overDeleteZone = false
+  const deleteZone = document.querySelector('#kanban-delete-zone')
 
   function onMove(ev) {
     const dx = ev.clientX - startX
@@ -734,20 +599,32 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
       if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return
       lifted = true
       card.setPointerCapture(startEvent.pointerId)
-      card.classList.add('dragging')
+      card.classList.add('zk-dragging')
       card.style.touchAction = 'none'
       ghost = document.createElement('div')
       ghost.className = 'kanban-card-ghost'
       ghost.innerHTML = `
-        <span class="drag-handle">${DRAG_HANDLE_SVG}</span>
+        <span class="zk-drag-handle">${DRAG_HANDLE_SVG}</span>
         <span class="kanban-card-text">${card.querySelector('.kanban-card-text').textContent}</span>
       `
       ghost.style.width = `${card.offsetWidth}px`
       document.body.appendChild(ghost)
+      deleteZone?.classList.add('visible')
     }
 
     ghost.style.left = `${ev.clientX - offsetX}px`
     ghost.style.top = `${ev.clientY - offsetY}px`
+
+    if (deleteZone) {
+      const dzRect = deleteZone.getBoundingClientRect()
+      overDeleteZone = ev.clientX >= dzRect.left && ev.clientX <= dzRect.right && ev.clientY >= dzRect.top && ev.clientY <= dzRect.bottom
+      deleteZone.classList.toggle('drop-target', overDeleteZone)
+    }
+
+    if (overDeleteZone) {
+      root.querySelectorAll('.kanban-column').forEach((col) => col.classList.remove('drop-target'))
+      return
+    }
 
     
     
@@ -779,10 +656,14 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
     const sourceCardsEl = card.parentElement
     const affected = sourceCardsEl === targetCardsEl ? [targetCardsEl] : [sourceCardsEl, targetCardsEl]
 
-    flipReorder(affected, () => {
-      if (insertBefore) targetCardsEl.insertBefore(card, insertBefore)
-      else targetCardsEl.appendChild(card)
-    })
+    flipReorder(
+      affected,
+      () => {
+        if (insertBefore) targetCardsEl.insertBefore(card, insertBefore)
+        else targetCardsEl.appendChild(card)
+      },
+      '.kanban-card'
+    )
   }
 
   function onEnd() {
@@ -792,10 +673,23 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
     document.removeEventListener('pointercancel', onEnd)
 
     root.querySelectorAll('.kanban-column').forEach((col) => col.classList.remove('drop-target'))
-    card.classList.remove('dragging')
+    deleteZone?.classList.remove('visible', 'drop-target')
+    card.classList.remove('zk-dragging')
     card.style.touchAction = ''
     ghost?.remove()
     if (!lifted) return
+
+    if (overDeleteZone) {
+      const cardId = card.dataset.id
+      const boards = loadBoards()
+      const board = boards.find((b) => b.id === boardId)
+      const fromIdx = board.columns[originalCol].findIndex((c) => c.id === cardId)
+      if (fromIdx === -1) return
+      board.columns[originalCol].splice(fromIdx, 1)
+      saveBoards(boards)
+      rerender()
+      return
+    }
 
     
     
