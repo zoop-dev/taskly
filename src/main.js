@@ -1,5 +1,4 @@
 
-
 import './style.css'
 import '@material/web/icon/icon.js'
 import '@material/web/iconbutton/icon-button.js'
@@ -21,6 +20,7 @@ import { initDesktopWarning } from 'zoop-kit/desktop-warning.js'
 import { initSavedTheme, THEMES } from 'zoop-kit/theme-picker.js'
 import { initSettingsMenu } from 'zoop-kit/settings-menu.js'
 import { wireDragList, flipReorder, DRAG_HANDLE_SVG } from 'zoop-kit/drag-list.js'
+import { wireSegmentedTabs } from 'zoop-kit/segmented.js'
 import confetti from 'canvas-confetti'
 import { APP_VERSION, CHANGELOG } from './changelog.js'
 
@@ -65,25 +65,6 @@ function uid() {
 }
 
 
-
-
-
-function positionSegmentedThumb(container, instant = true) {
-  if (!container) return
-  const thumb = container.querySelector('.segmented-thumb')
-  const active = container.querySelector('button.active')
-  if (!thumb || !active) return
-
-  if (instant) thumb.style.transition = 'none'
-  thumb.style.width = `${active.offsetWidth}px`
-  thumb.style.transform = `translateX(${active.offsetLeft - 3}px)`
-  if (instant) {
-    thumb.offsetWidth 
-    thumb.style.transition = ''
-  }
-}
-
-
 function loadBoards() {
   try {
     return JSON.parse(localStorage.getItem(BOARDS_KEY)) || []
@@ -98,7 +79,6 @@ function saveBoards(list) {
 function emptyColumns() {
   return { todo: [], progress: [], done: [] }
 }
-
 
 function renderApp() {
   const app = document.querySelector('#app')
@@ -164,7 +144,6 @@ function initBoardsScreen() {
       list.innerHTML = `<div class="empty-hint">no projects yet</div>`
       return
     }
-    
     const sorted = boards
       .map((b, i) => ({ b, i }))
       .sort((x, y) => (y.b.pinned ? 1 : 0) - (x.b.pinned ? 1 : 0) || x.i - y.i)
@@ -258,7 +237,6 @@ function initBoardsScreen() {
   window.__tasklyRenderBoards = render
 }
 
-
 let projectView = 'todo'
 
 function openBoard(boardId) {
@@ -309,28 +287,10 @@ function openBoard(boardId) {
       window.__tasklyRenderBoards?.()
     })
 
-    el.querySelectorAll('.segmented button').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const oldThumb = el.querySelector('.segmented-thumb')
-        const oldTransform = oldThumb?.style.transform
-        const oldWidth = oldThumb?.style.width
-
-        projectView = btn.dataset.view
-        render()
-
-        const newThumb = el.querySelector('.segmented-thumb')
-        if (newThumb && oldTransform) {
-          newThumb.style.transition = 'none'
-          newThumb.style.transform = oldTransform
-          newThumb.style.width = oldWidth
-          newThumb.offsetWidth
-          newThumb.style.transition = ''
-          positionSegmentedThumb(el.querySelector('#project-view-segmented'), false)
-        }
-      })
+    wireSegmentedTabs('#project-view-segmented', (view) => {
+      projectView = view
+      render()
     })
-
-    positionSegmentedThumb(el.querySelector('#project-view-segmented'))
 
     if (projectView === 'todo') {
       renderProjectTodo(boardId, render)
@@ -351,7 +311,6 @@ function openBoard(boardId) {
     }, 300)
   }
 }
-
 
 function fireConfetti(originEl) {
   const rect = originEl.getBoundingClientRect()
@@ -470,7 +429,6 @@ function renderProjectBoard(boardId, rerender) {
   const boards = loadBoards()
   const board = boards.find((b) => b.id === boardId)
 
-  
   const oldHeights = new Map()
   body.querySelectorAll('.kanban-column').forEach((col) => {
     oldHeights.set(col.dataset.col, col.getBoundingClientRect().height)
@@ -516,8 +474,6 @@ function renderProjectBoard(boardId, rerender) {
       col.style.flex = 'none'
       col.style.height = `${oldH}px`
       col.style.transition = 'none'
-      
-      
       col.offsetHeight
       col.style.transition = 'height 0.25s ease'
       col.style.height = `${newH}px`
@@ -568,7 +524,6 @@ function renderProjectBoard(boardId, rerender) {
 
   wireDrag(body, boardId, rerender)
 }
-
 
 function wireDrag(root, boardId, rerender) {
   root.querySelectorAll('.kanban-card').forEach((card) => {
@@ -626,8 +581,6 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
       return
     }
 
-    
-    
     let targetCardsEl = null
     root.querySelectorAll('.kanban-column').forEach((col) => {
       const rect = col.getBoundingClientRect()
@@ -637,9 +590,6 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
     })
     if (!targetCardsEl) return
 
-    
-    
-    
     const siblings = [...targetCardsEl.querySelectorAll('.kanban-card')].filter((c) => c !== card)
     let insertBefore = null
     for (const sib of siblings) {
@@ -691,8 +641,6 @@ function onCardPointerDown(startEvent, card, root, boardId, rerender) {
       return
     }
 
-    
-    
     const cardsContainer = card.closest('.kanban-cards')
     if (!cardsContainer) return
     const toCol = cardsContainer.dataset.col
